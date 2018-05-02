@@ -25,6 +25,7 @@ const GULP = require('gulp');
 const GULP_PLUGINS = require('gulp-load-plugins')();
 
 // Setup the sync task
+GULP.task('default', getTask('sync'));
 GULP.task('sync', getTask('sync'));
 
 // Helper function for loading Gulp tasks from seperate files
