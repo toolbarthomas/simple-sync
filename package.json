@@ -4,7 +4,8 @@
   "description": "Gulp workflow for syncing codebase to external servers",
   "main": "index.js",
   "scripts": {
-    "start": "gulp sync",
+    "start": "gulp",
+    "watch": "gulp watch",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -25,9 +26,10 @@
   "devDependencies": {
     "chalk": "^2.4.1",
     "dotenv": "^5.0.1",
+    "fs-extra": "^6.0.1",
     "gulp": "^3.9.1",
-    "gulp-changed": "^3.2.0",
+    "gulp-directory-sync": "^1.2.3",
     "gulp-load-plugins": "^1.5.0",
-    "gulp-rsync": "0.0.8"
+    "gulp-watch": "^5.0.0"
   }
 }

@@ -4,8 +4,10 @@
 
 require('dotenv').config();
 
-// We use chalk to style output messages
+const GULP = require('gulp');
+const GULP_PLUGINS = require('gulp-load-plugins')();
 const CHALK = require('chalk');
+const FS = require('fs-extra');
 
 // Abort synchronization when no environment file
 // has been specified.
@@ -18,17 +20,46 @@ try {
     console.log(CHALK.red(error));
 }
 
-// Load Gulp for our workflow
-const GULP = require('gulp');
-
-// Load all Gulp plugins defined within the package.json file
-const GULP_PLUGINS = require('gulp-load-plugins')();
-
 // Setup the sync task
-GULP.task('default', getTask('sync'));
-GULP.task('sync', getTask('sync'));
+GULP.task('default', (done) => {
+    // Exit if one of the required environment variables aren't defined.
+    if((!process.env.SIMPLE_SYNC_SRC) || (!process.env.SIMPLE_SYNC_DEST)) {
+        console.log(CHALK.red('[ ERROR ] - no source or destination directory has been defined for our sync task.'));
+        process.exit();
+    }
 
-// Helper function for loading Gulp tasks from seperate files
-function getTask(file) {
-    return require('./gulp/' + file)(GULP, GULP_PLUGINS);
-}
+    // Exit when the source directory doesn't exists.
+    if (!FS.existsSync(process.env.SIMPLE_SYNC_SRC)) {
+        console.log(CHALK.red('[ ERROR ] - our source location doesn\'t exists. Please check your current src location: ' + process.env.SIMPLE_SYNC_SRC));
+        process.exit();
+    }
+
+    // Define the ignore list based from the environment file
+    let ignore_files = process.env.SIMPLE_SYNC_IGNORE || [];
+    if(ignore_files && ignore_files.length > 0) {
+        ignore_files = ignore_files.split(',');
+    }
+
+    let sync = GULP.src('package.json').pipe(
+        GULP_PLUGINS.directorySync(
+            process.env.SIMPLE_SYNC_SRC,
+            process.env.SIMPLE_SYNC_DEST,
+            {
+                nodelete: true,
+                ignore: ignore_files
+            }
+        )
+    );
+
+    return sync;
+});
+
+GULP.task('watch', function() {
+
+    return GULP_PLUGINS.watch([
+        process.env.SIMPLE_SYNC_SRC + '/**',
+    ], function() {
+        return GULP.start('default');
+    });
+
+});
